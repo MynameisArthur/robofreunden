@@ -1,8 +1,7 @@
 import React from 'react';
 import Card from './Card.component';
 
-const CardList = ({robots})=> {  
-    console.log('CardList');     
+const CardList = ({robots})=> {       
     return (
         <div>
             {
