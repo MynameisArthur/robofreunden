@@ -7,48 +7,48 @@ import Scroll from '../components/Scroll.component';
 import ErrorBoundary from '../components/ErrorBoundary.component';
 import CardList from '../components/CardList.component';
 
+import {setSearchField,requestRobots} from '../actions';
+import {connect} from 'react-redux';
+import Header from '../components/Header';
 
-class App extends Component {
-  constructor()
+class App extends Component {  
+  componentDidMount()
   {
-    super();
-    this.state = {
-      robots : [],
-      searchfield: ''
-    };
-  }
-  async componentDidMount()
-  {
-
-    const req = await fetch('https://jsonplaceholder.typicode.com/users');
-    const res = await req.json();
-    this.setState({robots: res});
-  }
-  onSearchChange = (e)=>{
-    this.setState({searchfield: e.target.value});
-  }
-  render() {    
-    const {robots,searchfield} = this.state;
+    this.props.onRequestRobots();
+    document.title = process.env.REACT_APP_PAGE_TITLE_ONE;        
+  }  
+  render() {
+    const {searchField,onSearchChange, robots,isPending} = this.props;
     const filteredRobots = robots.filter(robot=>{
-      return robot.name.toLowerCase().includes(searchfield.toLowerCase());
+      return robot.name.toLowerCase().includes(searchField.toLowerCase());
     });    
-    if(!robots.length)
+    if(isPending)
     {
-      return (<h1>Loading...</h1>);
-    }
-   
+      return (<h1>LOADING...</h1>);
+    }   
     return (
       <div className="tc">
-          <h1 className="f1">RoboFreunden</h1>
-          <SearchBox searchChange={this.onSearchChange}/>
+          <Header />   
+          <SearchBox searchChange={onSearchChange}/>
           <Scroll>
             <ErrorBoundary>
               <CardList robots={filteredRobots}/>
             </ErrorBoundary>
-          </Scroll>
+          </Scroll>          
         </div>
     );
   }
 }
  
-export default App;
+const mapStateToProps = (state)=>({
+  searchField: state.searchRobots.searchField,
+  robots: state.requestRobots.robots,
+  isPending: state.requestRobots.isPending,
+  error: state.requestRobots.error
+});
+const mapDispatchToProps = (dispatch)=>({
+  onSearchChange: e=>dispatch(setSearchField(e.target.value)),
+  onRequestRobots: ()=> dispatch(requestRobots())
+});
+
+export default connect(mapStateToProps,mapDispatchToProps)(App);
